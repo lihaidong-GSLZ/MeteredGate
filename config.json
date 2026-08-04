@@ -1,0 +1,16 @@
+{
+  "default_cycle_seconds": {
+    "default": 60,
+    "min": 1,
+    "max": 3600,
+    "is_integer": true,
+    "description": "新建 Metered Gate 的默认周期长度，单位为游戏秒。已经建成的闸门保留各自的设置。"
+  },
+  "default_items_per_cycle": {
+    "default": 1,
+    "min": 1,
+    "max": 1000,
+    "is_integer": true,
+    "description": "新建 Metered Gate 的默认每周期放行数量。已经建成的闸门保留各自的设置。"
+  }
+}

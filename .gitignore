@@ -1,0 +1,19 @@
+# .NET / MSBuild
+bin/
+obj/
+*.user
+*.suo
+*.pdb
+*.xml
+
+# 本地发布目录
+dist/
+
+# IDE
+.vs/
+.vscode/
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db

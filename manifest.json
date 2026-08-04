@@ -1,0 +1,20 @@
+{
+  "id": "MeteredGate",
+  "version": "0.1.0",
+  "display_name": "Metered Gate",
+  "description_short": "一个 1×1 的定量传送带闸门：每个游戏周期只允许指定数量的单位货物离开上游。",
+  "description_long": "Metered Gate 是一个可架高的 1×1 平面传送带物流节点。玩家可以分别设置周期长度和每周期放行数量；未使用的配额不会跨周期累积。建筑具有四个可动态配置的平面传送带端口，内部仅保留一个单位的传输缓冲，并在多个输出之间进行简单轮询。",
+  "authors": "你的公开作者名",
+  "links": [
+    "https://github.com/你的用户名/MeteredGate"
+  ],
+  "primary_dlls": [
+    "MeteredGate.dll"
+  ],
+  "primary_mod_class_name": "MeteredGate.MeteredGateMod",
+  "non_locking_dll_load": true,
+  "min_game_version": "0.8.6",
+  "max_verified_game_version": "0.8.6c",
+  "can_add_to_saved_game": true,
+  "can_remove_from_saved_game": false
+}
