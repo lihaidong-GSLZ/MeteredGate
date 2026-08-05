@@ -11,9 +11,9 @@
 
     <AssemblyName>MeteredGate</AssemblyName>
     <RootNamespace>MeteredGate</RootNamespace>
-    <Version>0.1.0</Version>
-    <FileVersion>0.1.0.0</FileVersion>
-    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <Version>0.2.0</Version>
+    <FileVersion>0.2.0.0</FileVersion>
+    <AssemblyVersion>0.2.0.0</AssemblyVersion>
 
     <!-- 生成稳定的托管程序集；不同机器仍可能因 SDK 版本而产生字节差异。 -->
     <Deterministic>true</Deterministic>
@@ -44,6 +44,10 @@
       Include="Microsoft.NETFramework.ReferenceAssemblies"
       Version="1.0.3"
       PrivateAssets="All" />
+    <!-- 高度边界仅对 MeteredGateProto 生效的局部运行时补丁。 -->
+    <PackageReference
+      Include="Lib.Harmony"
+      Version="2.4.2" />
   </ItemGroup>
 
   <!-- 游戏与 Unity 程序集只在编译时引用，不复制到 mod 输出目录。 -->
