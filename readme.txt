@@ -1,20 +1,16 @@
-Metered Gate 0.2.0
+Metered Gate 0.3.0
 
-A 1x1 metered flat-conveyor gate for Captain of Industry.
+A 1x1 metered logistics gate for flat conveyors.
 
-Main features:
-- configurable cycle duration and release quota;
-- unused quota does not accumulate;
-- one-item internal transfer buffer;
-- four dynamically configurable flat-conveyor ports;
-- independent placement-height limits with hard clamping;
-- original Flat Connector toolbar icon;
-- simple round-robin routing across multiple outputs.
+- Configurable cycle duration and release quota.
+- One-item internal buffer and round-robin outputs.
+- Four dynamically configurable flat-conveyor ports.
+- Uses the original Flat Connector layout, model, icon, and native height range.
+- Consumes 20 kW continuously while enabled and uses the native power-priority UI.
+- Does not inherit ZipperProto or MiniZipperProto.
+- Does not use or bundle Harmony.
+- Migrates existing 0.1.0/0.2.0 MeteredGate_Entity save data.
 
-Installation:
-Copy the complete MeteredGate directory into the Captain of Industry Mods directory.
-Do not remove 0Harmony.dll; it is required by version 0.2.0.
-
-Compatibility:
-Verified with Captain of Industry 0.8.6c.
-The mod and entity IDs remain compatible with version 0.1.0 saves.
+Install by extracting the complete MeteredGate folder into the game's Mods directory.
+Delete the old MeteredGate folder first so that the obsolete 0Harmony.dll from 0.2.0 is not left behind.
+Do not remove this mod while a save still contains Metered Gate buildings.

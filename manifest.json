@@ -1,15 +1,14 @@
 {
   "id": "MeteredGate",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "display_name": "Metered Gate",
   "description_short": "一个 1×1 的定量传送带闸门：每个游戏周期只允许指定数量的单位货物离开上游。",
-  "description_long": "Metered Gate 是一个可架高的 1×1 平面传送带物流节点。玩家可以分别设置周期长度和每周期放行数量；未使用的配额不会跨周期累积。建筑具有四个可动态配置的平面传送带端口，内部仅保留一个单位的传输缓冲，并在多个输出之间进行简单轮询。0.2.0 增加了独立高度边界限制，并复用原版 Flat Connector 的菜单图标。",
+  "description_long": "Metered Gate 是一个可架高的 1×1 平面传送带物流节点。玩家可以分别设置周期长度和每周期放行数量；未使用的配额不会跨周期累积。0.3.0 直接复用原版 Flat Connector 的布局、端口、图形和原生高度范围，不再继承 Balancer/Zipper，也不再使用 Harmony。建筑消耗 20 kW，使用游戏原生电力 Priority UI，并兼容 0.1.0/0.2.0 的 MeteredGate_Entity 存档数据。",
   "authors": "lihaidong",
   "links": [
     "https://github.com/lihaidong-GSLZ/MeteredGate"
   ],
   "primary_dlls": [
-    "0Harmony.dll",
     "MeteredGate.dll"
   ],
   "primary_mod_class_name": "MeteredGate.MeteredGateMod",

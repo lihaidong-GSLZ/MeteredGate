@@ -1,25 +1,25 @@
 # 更新记录
 
+## 0.3.0
+
+- 将玩家建筑原型改为直接继承 `LayoutEntityProto`；
+- 直接复用 Flat Connector 的布局、端口、图形、图标和原生高度范围；
+- 删除 `ZipperProto` 继承以及 Flat Balancer 数据依赖；
+- 删除全部 Harmony 补丁和 `0Harmony.dll` 运行库；
+- 新增连续 `20 kW` 用电和游戏原生电力 Priority UI；
+- Inspector 写操作改为可回放的 `InputCommand`；
+- 新增正式 v1 → v2 存档迁移，兼容 0.1.0/0.2.0 建筑并补建电力 consumer；
+- 保留 `MeteredGate` Mod ID、`MeteredGate.dll`、`MeteredGate.MeteredGateMod`、`MeteredGate_Entity` 和复制配置键；
+- 加固启停生命周期、反序列化归一化、整数溢出、UI 刷新和轮询索引；
+- 构建脚本现在同时生成可直接上传 CoI Hub 的 ZIP。
+
 ## 0.2.0
 
-- 保持正式模组 ID、建筑原型 ID 和存档数据兼容；
-- 不再从 Flat Balancer 继承可架高属性，Balancer 只提供建造成本；
-- 保留 `ZipperProto` 玩家建筑结构，不继承或模拟 `MiniZipperProto`；
 - 新增独立高度范围与局部 Harmony 边界补丁；
-- 普通升降和 Shift 快速升降均会夹紧到运输支柱允许范围；
-- 复用原版 Flat Connector 的菜单栏图标；
-- 保留 0.1.0 的周期、配额、单件缓冲、轮询输出、存档和复制语义。
+- 复用原版 Flat Connector 菜单图标；
+- 保持正式模组和建筑原型 ID。
 
 ## 0.1.0
 
-第一个公开版本。
-
-- 新增 `1×1`、可架高的定量平面传送带闸门；
-- 支持四个动态配置的输入/输出端口；
-- 支持独立设置周期长度和每周期放行数量；
-- 未使用配额不会跨周期累积；
-- 内部传输缓冲限制为一个单位；
-- 配额在物品离开上游、进入闸门时消耗；
-- 多个输出之间采用简单轮询；
-- Inspector 提供周期读条、剩余配额读条和状态显示；
-- 支持保存、载入与复制设置。
+- 第一个公开版本；
+- 新增 `1×1` 定量平面传送带闸门、周期/配额、单件缓冲、轮询输出、Inspector、保存与复制设置。

@@ -11,11 +11,10 @@
 
     <AssemblyName>MeteredGate</AssemblyName>
     <RootNamespace>MeteredGate</RootNamespace>
-    <Version>0.2.0</Version>
-    <FileVersion>0.2.0.0</FileVersion>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
+    <Version>0.3.0</Version>
+    <FileVersion>0.3.0.0</FileVersion>
+    <AssemblyVersion>0.3.0.0</AssemblyVersion>
 
-    <!-- 生成稳定的托管程序集；不同机器仍可能因 SDK 版本而产生字节差异。 -->
     <Deterministic>true</Deterministic>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -44,13 +43,9 @@
       Include="Microsoft.NETFramework.ReferenceAssemblies"
       Version="1.0.3"
       PrivateAssets="All" />
-    <!-- 高度边界仅对 MeteredGateProto 生效的局部运行时补丁。 -->
-    <PackageReference
-      Include="Lib.Harmony"
-      Version="2.4.2" />
   </ItemGroup>
 
-  <!-- 游戏与 Unity 程序集只在编译时引用，不复制到 mod 输出目录。 -->
+  <!-- 游戏与 Unity 程序集只在编译时引用，不复制到模组输出目录。 -->
   <ItemGroup>
     <Reference Include="Mafi">
       <HintPath>$(COI_MANAGED_DIR)/Mafi.dll</HintPath>
@@ -74,15 +69,15 @@
     </Reference>
   </ItemGroup>
 
-  <!-- 这些文件会复制到 bin/<配置>/net48，方便手动制作发行包。 -->
   <ItemGroup>
     <None Update="manifest.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="config.json" CopyToOutputDirectory="PreserveNewest" />
     <None Update="readme.txt" CopyToOutputDirectory="PreserveNewest" />
     <None Update="changelog.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="LICENSE" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="THIRD_PARTY_NOTICES.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <!-- 在真正进入 C# 编译前给出明确的路径错误。 -->
   <Target Name="ValidateCoiReferences" BeforeTargets="ResolveReferences">
     <Error
       Condition="'$(COI_ROOT)' == ''"

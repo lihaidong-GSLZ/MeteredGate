@@ -1,8 +1,5 @@
 # Third-party notices
 
-Metered Gate 0.2.0 uses Harmony (`Lib.Harmony` 2.4.2) to apply narrowly scoped runtime patches to the building placement controller.
+Metered Gate 0.3.0 does not bundle third-party managed libraries.
 
-The patches activate only while placing `MeteredGateProto` and enforce the mod's own height range. Harmony is distributed under the MIT License.
-
-- Project: https://github.com/pardeike/Harmony
-- Package: https://www.nuget.org/packages/Lib.Harmony/
+The mod references Captain of Industry and Unity assemblies only at compile time. Those assemblies and the game assets reused at runtime remain the property of their respective owners and are not redistributed in this repository or release package.

@@ -8,11 +8,21 @@ using StaticEntityId = Mafi.Core.Entities.Static.StaticEntityProto.ID;
 
 namespace MeteredGate {
 	/// <summary>
-	/// 建筑原型：继续使用 ZipperProto 的正常玩家建筑语义。
-	/// Flat Connector 只提供 1×1 四向动态端口布局和图形，不提供升降策略。
-	/// 高度限制由 MeteredGateHeightPolicy 独立实现。
+	/// 玩家可建造的连接器型原型。
+	///
+	/// 该类型不继承 ZipperProto，也不继承 MiniZipperProto：
+	/// - ZipperProto 会带入平衡器/分流器专用的原型语义；
+	/// - MiniZipperProto 会触发 MiniZipperValidator，要求切开现有运输带，并会被
+	///   蓝图系统当作自动连接器忽略。
+	///
+	/// 因此这里直接继承 LayoutEntityProto，同时复用原版 Flat Connector 的
+	/// EntityLayout 与 Gfx。放置高度范围由 sourceConnector.Layout 中的
+	/// PlacementHeightRange 原生提供，不再使用 Harmony 修改放置器。
 	/// </summary>
-	public sealed class MeteredGateProto : ZipperProto {
+	public sealed class MeteredGateProto :
+		LayoutEntityProto,
+		IProtoWithPowerConsumption {
+
 		private static readonly MethodInfo s_memberwiseClone = typeof(object).GetMethod(
 			"MemberwiseClone",
 			BindingFlags.Instance | BindingFlags.NonPublic)
@@ -23,9 +33,6 @@ namespace MeteredGate {
 			BindingFlags.Instance | BindingFlags.NonPublic)
 			?? throw new MissingFieldException(typeof(LayoutEntityProto.Gfx).FullName, "m_proto");
 
-		// IconPath 的 setter 是私有的。复制 Connector 的 Gfx 后，需要写入
-		// backing field，并把 IconIsCustom 设为 true，阻止新 Proto 初始化时
-		// 按 MeteredGate 的 ID 重新生成不存在的图标路径。
 		private static readonly FieldInfo s_graphicsIconPath = typeof(LayoutEntityProto.Gfx).GetField(
 			"<IconPath>k__BackingField",
 			BindingFlags.Instance | BindingFlags.NonPublic)
@@ -33,8 +40,6 @@ namespace MeteredGate {
 				typeof(LayoutEntityProto.Gfx).FullName,
 				"<IconPath>k__BackingField");
 
-		// IconIsCustom 是当前游戏 API 中的 public readonly 字段，不能直接赋值。
-		// 通过反射写入复制后的 Gfx，避免初始化阶段重写 Connector 图标路径。
 		private static readonly FieldInfo s_graphicsIconIsCustom = typeof(LayoutEntityProto.Gfx).GetField(
 			"IconIsCustom",
 			BindingFlags.Instance | BindingFlags.Public)
@@ -46,36 +51,53 @@ namespace MeteredGate {
 			StaticEntityId id,
 			Proto.Str strings,
 			MiniZipperProto sourceConnector,
-			EntityCosts costs)
+			EntityCosts costs,
+			Electricity electricityConsumed)
 			: base(
 				id,
 				strings,
-
-				// Connector 在这里仅作为布局/端口模板。
 				sourceConnector.Layout,
-
 				costs,
-				Electricity.Zero,
+				cloneGraphics(sourceConnector),
+				constructionDurationPerProduct: null,
+				boostCost: null,
+				cannotBeBuiltByPlayer: false,
+				cannotBeDestroyedByFlood: false,
+				isUnique: false,
+				cannotBeReflected: sourceConnector.CannotBeReflected,
+				autoBuildMiniZippers: false,
+				doNotStartConstructionAutomatically: false,
+				doNotCheckVehicleGoalHeightRange: false,
+				canMoveUpDownWhenInvalidPlacement:
+					sourceConnector.CanMoveUpDownWhenInvalidPlacement,
+				collapseRubbleScale: null,
+				customBuriedTolerance: null,
+				tags: null) {
 
-				// 不再读取 sourceBalancer.CanBeElevated，也不模拟 MiniZipperProto。
-				// Metered Gate 本身是允许架高的玩家建筑。
-				true,
+			ElectricityConsumed = electricityConsumed;
 
-				cloneGraphics(sourceConnector)) {
+			// 这是核心结构不变量：高度范围必须直接来自连接器布局。
+			if (Layout.PlacementHeightRange.From.Value !=
+					sourceConnector.Layout.PlacementHeightRange.From.Value ||
+				Layout.PlacementHeightRange.To.Value !=
+					sourceConnector.Layout.PlacementHeightRange.To.Value) {
+				throw new InvalidOperationException(
+					"MeteredGate layout did not preserve the connector placement height range.");
+			}
 		}
 
 		public override Type EntityType => typeof(MeteredGateEntity);
 
+		public Electricity ElectricityConsumed { get; }
+
 		/// <summary>
-		/// 浅复制原版 Connector 图形，解除旧 Proto 所有权，并固定其菜单图标路径。
-		/// 该逻辑只影响图形配置，不参与高度限制。
+		/// 复制原版 Connector 图形，解除旧 Proto 所有权，并固定其工具栏图标路径。
+		/// 图形对象在初始化时会写入所属 Proto，不能被两个 Proto 直接共享。
 		/// </summary>
 		private static LayoutEntityProto.Gfx cloneGraphics(MiniZipperProto sourceConnector) {
 			LayoutEntityProto.Gfx source = sourceConnector.Graphics;
 			var clone = (LayoutEntityProto.Gfx)s_memberwiseClone.Invoke(source, null);
 
-			// 若原版 Connector 已完成初始化，直接复用当前路径；否则按照
-			// Core LayoutEntity 的原生生成规则构造其资源路径。
 			string connectorIconPath = sourceConnector.IconPath;
 			if (string.IsNullOrEmpty(connectorIconPath)) {
 				connectorIconPath =
@@ -84,12 +106,10 @@ namespace MeteredGate {
 
 			s_graphicsIconPath.SetValue(clone, connectorIconPath);
 			s_graphicsIconIsCustom.SetValue(clone, true);
-
-			// 复制对象必须由 MeteredGateProto 在自身初始化阶段重新绑定。
 			s_graphicsOwner.SetValue(clone, null);
 
 			Log.Info(
-				$"MeteredGate: reusing Flat Connector toolbar icon " +
+				$"MeteredGate: reusing Flat Connector graphics and toolbar icon " +
 				$"'{connectorIconPath}'.");
 			return clone;
 		}

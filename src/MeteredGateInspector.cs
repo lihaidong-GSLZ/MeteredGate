@@ -1,6 +1,5 @@
 using System;
 using Mafi;
-using Mafi.Core;
 using Mafi.Core.Syncers;
 using Mafi.Localization;
 using Mafi.Unity;
@@ -14,14 +13,8 @@ using ClickEvent = UnityEngine.UIElements.ClickEvent;
 
 namespace MeteredGate {
 	/// <summary>
-	/// Metered Gate 的建筑 Inspector。
-	///
-	/// 显示三个原生风格卡片：
-	/// - 周期设置、周期进度和下次刷新倒计时；
-	/// - 每周期放行数量、当前剩余配额和配额进度；
-	/// - 当前运行状态。
-	///
-	/// Inspector 只读取实体状态并调用公开设置方法，不持有物流状态。
+	/// Inspector 只读取实体状态。所有会改变模拟状态的操作都通过
+	/// BaseInspector.ScheduleCommand() 进入游戏输入调度器。
 	/// </summary>
 	[GlobalDependency(RegistrationMode.AsAllInterfaces, false, false)]
 	public sealed class MeteredGateInspector : BaseInspector<MeteredGateEntity> {
@@ -38,35 +31,33 @@ namespace MeteredGate {
 		public MeteredGateInspector(UiContext context) : base(context) {
 			EmbedStatusToTheTop();
 
-			m_cycleValue = new Label()
-				.FontBold()
-				.Width(84.px());
-			m_countdownValue = new Label()
-				.FontBold();
-			m_cycleProgress = new ProgressBar()
-				.AlignSelfStretch();
+			m_cycleValue = new Label().FontBold().Width(84.px());
+			m_countdownValue = new Label().FontBold();
+			m_cycleProgress = new ProgressBar().AlignSelfStretch();
 
-			m_quotaValue = new Label()
-				.FontBold()
-				.Width(84.px());
-			m_quotaSummary = new Label()
-				.FontBold();
-			m_quotaProgress = new ProgressBar()
-				.AlignSelfStretch();
+			m_quotaValue = new Label().FontBold().Width(84.px());
+			m_quotaSummary = new Label().FontBold();
+			m_quotaProgress = new ProgressBar().AlignSelfStretch();
 
-			m_statusValue = new Label()
-				.FontBold();
+			m_statusValue = new Label().FontBold();
 
 			var cycleControls = new Row(6.pt()) {
-				new ButtonText("-10 s".AsLoc(), (Action)(() => Entity?.AdjustCycleSeconds(-10))).Compact(),
+				new ButtonText(
+					"-10 s".AsLoc(),
+					(Action)(() => schedule(
+						MeteredGateCommandKind.AdjustCycleSeconds,
+						-10))).Compact(),
 				m_cycleValue,
-				new ButtonText("+10 s".AsLoc(), (Action)(() => Entity?.AdjustCycleSeconds(10))).Compact()
+				new ButtonText(
+					"+10 s".AsLoc(),
+					(Action)(() => schedule(
+						MeteredGateCommandKind.AdjustCycleSeconds,
+						10))).Compact()
 			}
 				.MarginLeft(8.pt())
 				.MarginRight(8.pt());
 
-			var cycleCard = new PanelRow(6.pt())
-				.AlignSelfStretch();
+			var cycleCard = new PanelRow(6.pt()).AlignSelfStretch();
 			cycleCard.Add(
 				new Column(4.pt()) {
 					new Label("Cycle".AsLoc()).FontBold(),
@@ -79,15 +70,22 @@ namespace MeteredGate {
 				.MarginBottom(8.pt()));
 
 			var quotaControls = new Row(6.pt()) {
-				new ButtonText("-1".AsLoc(), (Action)(() => Entity?.AdjustItemsPerCycle(-1))).Compact(),
+				new ButtonText(
+					"-1".AsLoc(),
+					(Action)(() => schedule(
+						MeteredGateCommandKind.AdjustItemsPerCycle,
+						-1))).Compact(),
 				m_quotaValue,
-				new ButtonText("+1".AsLoc(), (Action)(() => Entity?.AdjustItemsPerCycle(1))).Compact()
+				new ButtonText(
+					"+1".AsLoc(),
+					(Action)(() => schedule(
+						MeteredGateCommandKind.AdjustItemsPerCycle,
+						1))).Compact()
 			}
 				.MarginLeft(8.pt())
 				.MarginRight(8.pt());
 
-			var quotaCard = new PanelRow(6.pt())
-				.AlignSelfStretch();
+			var quotaCard = new PanelRow(6.pt()).AlignSelfStretch();
 			quotaCard.Add(
 				new Column(4.pt()) {
 					new Label("Release quota".AsLoc()).FontBold(),
@@ -99,8 +97,7 @@ namespace MeteredGate {
 				.MarginRight(8.pt())
 				.MarginBottom(8.pt()));
 
-			var statusCard = new PanelRow(6.pt())
-				.AlignSelfStretch();
+			var statusCard = new PanelRow(6.pt()).AlignSelfStretch();
 			statusCard.Add(
 				new Column(4.pt()) {
 					new Label("Status".AsLoc()).FontBold(),
@@ -123,7 +120,7 @@ namespace MeteredGate {
 			var restartButton = new ButtonIcon(
 				Button.General,
 				"Assets/Unity/UserInterface/General/Repeat.svg",
-				(Action)(() => Entity?.RestartCycle()))
+				(Action)(() => schedule(MeteredGateCommandKind.RestartCycle)))
 				.Compact()
 				.IconSize(14.px())
 				.MarginLeft(4.pt())
@@ -132,26 +129,40 @@ namespace MeteredGate {
 			restartButton.OnClick((ClickEvent evt) => evt.StopPropagation());
 			panel.Header.Add(restartButton);
 
-			this.Observe(() => Entity == null ? "none" : $"{Entity.Id}_{Entity.UiUpdateTrigger}")
-				.Do(_ => refresh());
+			// 分别观察实体引用和整数触发器，避免每次刷新分配插值字符串。
+			this.Observe(() => Entity)
+				.Observe(() => Entity == null ? 0 : Entity.UiUpdateTrigger)
+				.Do((_, __) => refresh());
 		}
 
-		private void refresh() {
-			if (Entity == null) {
+		private void schedule(MeteredGateCommandKind kind, int value = 0) {
+			MeteredGateEntity entity = Entity;
+			if (entity == null) {
 				return;
 			}
 
-			m_cycleValue.Value(new LocStrFormatted($"{Entity.CycleSeconds} s"));
+			ScheduleCommand(new MeteredGateConfigCmd(entity.Id, kind, value));
+		}
+
+		private void refresh() {
+			// 对本次刷新使用同一个实体快照，避免选择切换时多次读取 Entity
+			// 得到不同对象或在中途变为 null。
+			MeteredGateEntity entity = Entity;
+			if (entity == null) {
+				return;
+			}
+
+			m_cycleValue.Value(new LocStrFormatted($"{entity.CycleSeconds} s"));
 			m_countdownValue.Value(new LocStrFormatted(
-				$"Next quota refresh in {Entity.SecondsUntilNextCycle} s"));
-			m_cycleProgress.ValueFromRatio(Entity.CycleElapsedTicks, Entity.CycleDurationTicks);
+				$"Next quota refresh in {entity.SecondsUntilNextCycle} s"));
+			m_cycleProgress.ValueFromRatio(entity.CycleElapsedTicks, entity.CycleDurationTicks);
 
-			m_quotaValue.Value(new LocStrFormatted(Entity.ItemsPerCycle.ToString()));
+			m_quotaValue.Value(new LocStrFormatted(entity.ItemsPerCycle.ToString()));
 			m_quotaSummary.Value(new LocStrFormatted(
-				$"{Entity.RemainingQuota} of {Entity.ItemsPerCycle} release permits available"));
-			m_quotaProgress.ValueFromRatio(Entity.RemainingQuota, Entity.ItemsPerCycle);
+				$"{entity.RemainingQuota} of {entity.ItemsPerCycle} release permits available"));
+			m_quotaProgress.ValueFromRatio(entity.RemainingQuota, entity.ItemsPerCycle);
 
-			m_statusValue.Value(new LocStrFormatted(Entity.GateStatus));
+			m_statusValue.Value(new LocStrFormatted(entity.GateStatus));
 		}
 	}
 }
