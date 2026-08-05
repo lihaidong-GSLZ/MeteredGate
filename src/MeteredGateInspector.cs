@@ -41,18 +41,33 @@ namespace MeteredGate {
 
 			m_statusValue = new Label().FontBold();
 
-			var cycleControls = new Row(6.pt()) {
-				new ButtonText(
-					"-10 s".AsLoc(),
-					(Action)(() => schedule(
-						MeteredGateCommandKind.AdjustCycleSeconds,
-						-10))).Compact(),
-				m_cycleValue,
-				new ButtonText(
-					"+10 s".AsLoc(),
-					(Action)(() => schedule(
-						MeteredGateCommandKind.AdjustCycleSeconds,
-						10))).Compact()
+			var cycleControls = new Column(4.pt()) {
+				new Row(6.pt()) {
+					new ButtonText(
+						"-1 s".AsLoc(),
+						(Action)(() => schedule(
+							MeteredGateCommandKind.AdjustCycleSeconds,
+							-1))).Compact(),
+					m_cycleValue,
+					new ButtonText(
+						"+1 s".AsLoc(),
+						(Action)(() => schedule(
+							MeteredGateCommandKind.AdjustCycleSeconds,
+							1))).Compact()
+				},
+				new Row(6.pt()) {
+					new ButtonText(
+						"-30 s".AsLoc(),
+						(Action)(() => schedule(
+							MeteredGateCommandKind.AdjustCycleSeconds,
+							-30))).Compact(),
+					new Label().Width(84.px()),
+					new ButtonText(
+						"+30 s".AsLoc(),
+						(Action)(() => schedule(
+							MeteredGateCommandKind.AdjustCycleSeconds,
+							30))).Compact()
+				}
 			}
 				.MarginLeft(8.pt())
 				.MarginRight(8.pt());

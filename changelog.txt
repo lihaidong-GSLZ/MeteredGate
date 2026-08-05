@@ -1,22 +1,21 @@
-0.3.0
+0.3.1
+- Added -30 s, -1 s, +1 s, and +30 s cycle-duration controls to the Inspector.
+- Fixed the placement-height restriction not being enforced in 0.3.0.
+- Added a public-API entity addition validator for Metered Gate placement.
+- The validator calculates height relative to rounded terrain height and enforces the Flat Connector PlacementHeightRange.
+- Out-of-range normal placement, Shift movement, cloning, blueprints, and moves are now rejected.
+- Still uses no Harmony patches and no bundled third-party runtime.
 
+0.3.0
 - Rebuilt the player prototype directly on LayoutEntityProto.
-- Reused the original Flat Connector layout, ports, graphics, icon, and native placement-height range.
-- Removed ZipperProto inheritance and all Flat Balancer data dependencies.
+- Reused the original Flat Connector layout, ports, graphics, icon, and height-range data.
+- Removed ZipperProto inheritance and Flat Balancer data dependencies.
 - Removed Harmony and the bundled 0Harmony.dll runtime.
-- Added continuous 20 kW electricity consumption and the native power-priority UI.
-- Routed inspector changes through replayable InputCommand processors.
-- Added safe migration of 0.1.0/0.2.0 save format v1 to the new electricity-enabled v2 format.
-- Preserved the MeteredGate mod ID, MeteredGate.dll assembly, MeteredGate.MeteredGateMod entry point, MeteredGate_Entity prototype ID, and clone-configuration keys.
-- Hardened lifecycle, serialization, overflow handling, UI refreshes, and round-robin output state.
+- Added continuous 20 kW power consumption and native power priority.
+- Added v1-to-v2 save migration for 0.1.0/0.2.0 buildings.
 
 0.2.0
-
-- Added an independent placement-height range and local Harmony boundary clamps.
-- Reused the original Flat Connector toolbar icon.
-- Preserved the formal mod and prototype IDs.
+- Added a standalone placement-height range and local Harmony boundary clamps.
 
 0.1.0
-
-- First public release.
-- Added a 1x1 metered flat-conveyor gate with configurable cycle and quota.
+- Initial public release.

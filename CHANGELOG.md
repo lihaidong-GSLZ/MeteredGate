@@ -1,17 +1,25 @@
 # 更新记录
 
+## 0.3.1
+
+- Inspector 的周期读秒控制改为 `-30 s`、`-1 s`、`+1 s`、`+30 s` 四档，兼顾精细调整与快速调整；
+- 修复 0.3.0 中高度限制实际未被最终建造验证强制执行的问题；
+- 新增基于公开 API 的 `MeteredGateHeightValidator`；
+- 验证器复现原版预览的相对地形高度计算，并严格检查 Flat Connector 的 `PlacementHeightRange`；
+- 范围外的单体放置、Shift 越界、复制、蓝图和移动请求现在会被标记为无效并拒绝提交；
+- 保持无 Harmony、无放置器私有字段/方法补丁的架构；
+- 修正文档中“原生验证会自动拒绝普通 Proto 范围外位置”的错误说明。
+
 ## 0.3.0
 
 - 将玩家建筑原型改为直接继承 `LayoutEntityProto`；
-- 直接复用 Flat Connector 的布局、端口、图形、图标和原生高度范围；
+- 复用 Flat Connector 的布局、端口、图形、图标和高度范围数据；
 - 删除 `ZipperProto` 继承以及 Flat Balancer 数据依赖；
 - 删除全部 Harmony 补丁和 `0Harmony.dll` 运行库；
 - 新增连续 `20 kW` 用电和游戏原生电力 Priority UI；
 - Inspector 写操作改为可回放的 `InputCommand`；
 - 新增正式 v1 → v2 存档迁移，兼容 0.1.0/0.2.0 建筑并补建电力 consumer；
-- 保留 `MeteredGate` Mod ID、`MeteredGate.dll`、`MeteredGate.MeteredGateMod`、`MeteredGate_Entity` 和复制配置键；
-- 加固启停生命周期、反序列化归一化、整数溢出、UI 刷新和轮询索引；
-- 构建脚本现在同时生成可直接上传 CoI Hub 的 ZIP。
+- 保留正式 Mod、程序集、入口类、原型和复制配置键。
 
 ## 0.2.0
 

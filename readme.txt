@@ -1,11 +1,13 @@
-Metered Gate 0.3.0
+Metered Gate 0.3.1
 
 A 1x1 metered logistics gate for flat conveyors.
 
 - Configurable cycle duration and release quota.
+- Inspector cycle controls: -30 s, -1 s, +1 s, and +30 s.
 - One-item internal buffer and round-robin outputs.
 - Four dynamically configurable flat-conveyor ports.
-- Uses the original Flat Connector layout, model, icon, and native height range.
+- Uses the original Flat Connector layout, model, icon, and height range.
+- Enforces that range with the game's public entity-addition validation API.
 - Consumes 20 kW continuously while enabled and uses the native power-priority UI.
 - Does not inherit ZipperProto or MiniZipperProto.
 - Does not use or bundle Harmony.

@@ -1,113 +1,87 @@
-# Metered Gate 0.3.0 代码与程序集审计
+# Metered Gate 0.3.1 代码与程序集审计
 
-审计目标是把 0.2.0 的玩家建筑从 `ZipperProto + Harmony 高度补丁` 重构为直接使用游戏原生布局契约的普通 `LayoutEntityProto`，同时保持正式存档身份不变。
+## 审计结论
 
-## 审计输入
+0.3.0 的高度方案存在一个真实缺陷：`EntityLayout.PlacementHeightRange` 会被放置器读取，但普通 `LayoutEntityProto` 到达边界后仍可通过 `LayoutEntityPreview.CanMoveUpDownIfValid()` 继续升降，而且原生最终添加验证并不会自动检查该范围。因此范围外位置可能真正建成。
 
-- Metered Gate 0.2.0 GitHub 主分支；
-- 0.3.0 connector-native 源码；
-- Captain of Industry 0.8.6 的 `Mafi.dll`、`Mafi.Core.dll`、`Mafi.Base.dll`、`Mafi.Unity.dll`；
-- Unity UIElements 相关程序集。
+0.3.1 保持普通 `LayoutEntityProto`、无 Harmony、无 MiniZipper 类型身份的结构，并新增公开 API 验证器作为最终安全边界。
 
-## 结论
+## 高度验证契约
 
-在静态源码和 0.8.6 程序集契约范围内，没有遗留的高严重度或中严重度缺陷。0.3.0 不再使用 Harmony，不再继承 `ZipperProto`/`MiniZipperProto`，也不再从 Flat Balancer 读取数据。
+新增类型：
 
-由于审计环境没有 .NET SDK，最终 C# 编译、游戏启动和实际存档迁移仍必须在安装了游戏的机器上验证。
+```text
+MeteredGateHeightValidator
+  : IEntityAdditionValidator<LayoutEntityAddRequest>
+```
 
-## 已确认的核心契约
+注册路径：
 
-### 原型与放置
+```text
+DataOnlyMod.RegisterDependencies(...)
+DependencyResolverBuilder.RegisterDependency<T>().AsAllInterfaces()
+```
+
+实际 CoI 0.8.6 程序集确认：
+
+- `IEntityAdditionValidator<T>.CanAdd(T)` 返回 `EntityValidationResult`；
+- `EntityValidators` 从 `AllImplementationsOf<IEntityAdditionValidator>` 收集实现，并根据泛型请求类型调用；
+- `LayoutEntityAddRequest` 暴露 `Proto`、`Transform`、`Origin` 与布局数据；
+- `TerrainManager[Tile2i].Height.TilesHeightRounded` 与原版预览的估算高度计算一致；
+- `HeightTilesI - HeightTilesI` 返回 `ThicknessTilesI`；
+- `EntityValidationResult.CreateError` 是正式的拒绝添加路径。
+
+验证器算法：
+
+```text
+if request.Proto is not MeteredGateProto:
+    Success
+
+position = request.Transform.Position
+terrainHeight = terrain[position.Xy].Height.TilesHeightRounded
+relativeHeight = position.Height - terrainHeight
+allowed = proto.Layout.PlacementHeightRange
+
+if allowed.From <= relativeHeight <= allowed.To:
+    Success
+else:
+    CreateError(...)
+```
+
+地图外请求先由原生 `LayoutEntityTerrainValidator` 处理。为兼容“调用全部验证器”的路径，自定义验证器在索引 TerrainManager 之前也检查 `TerrainArea.ContainsTile`。
+
+## 设计取舍
+
+没有重新继承 `MiniZipperProto`，因为该类型还会触发：
+
+- Mini Zipper 专用放置 validator；
+- 切开既有运输带；
+- 自动连接器生成；
+- 蓝图过滤和其他类型特判。
+
+没有恢复 Harmony，因为最终合法性可以通过公开 validator API 完成。预览游标仍可能因 Shift 一次跨界，但范围外请求会变为无效并被拒绝，不能建成。
+
+## 其他核心契约
 
 - `MeteredGateProto` 直接继承 `LayoutEntityProto`；
 - Flat Connector 只作为 `EntityLayout` 和 `Gfx` 模板；
-- `EntityLayout.PlacementHeightRange` 会被原生放置器读取；
-- 不继承 `MiniZipperProto`，避免触发 `MiniZipperValidator`、运输带切割、自动连接器生成和蓝图忽略；
-- 不再访问 `StaticEntityMassPlacer` 私有字段或私有升降方法。
-
-### 成本与电力
-
-- 建造成本取自一段 Flat Conveyor；
-- `EntityCosts` 使用具名参数，明确指定 `workers: 0`；
-- 维护成本为空；
-- 原型通过 `IProtoWithPowerConsumption` 声明 `20 kW`；
-- 实体通过 `IElectricityConsumingEntity` 和官方 `ElectricityConsumerFactory` 接入电力系统；
-- `ElectricityConsumer` 观察实体启用状态和通用 Priority，原生 Priority UI 无需自定义补丁。
-
-### 物流端口
-
-- `LayoutEntity` 负责创建和保存布局端口；
-- `ReceiveAsMuchAsFromPort` 返回未接收数量；
-- `SendAsMuchAs` 返回未发送数量；
-- 内部缓冲最多一件；
-- 配额在货物离开上游时扣除；
-- 多输出使用 round-robin，输出数量变化时索引会归一化；
-- 拆除时缓冲货物通过 `AssetTransactionManager` 返还。
-
-### 命令与 UI
-
-- Inspector 不直接修改模拟状态；
-- 所有按钮通过 `InputCommand` 和 `ICommandProcessor<T>` 调度；
-- 自定义静态 `Deserialize(BlobReader)` 显式使用 `new`，消除 CS0108 并保留游戏序列化约定；
-- UI 使用整数触发器，只在状态或可见整秒变化时刷新。
-
-### 存档迁移
-
-0.1.0/0.2.0 使用 v1，字段顺序为：
-
-1. 基类数据；
-2. 版本号；
-3. 缓冲物品；
-4. 剩余配额；
-5. 周期相位；
-6. 周期秒数；
-7. 每周期配额；
-8. round-robin 索引。
-
-0.3.0 的 v2 在版本号后增加 `ElectricityConsumer`。读取 v1 时不在实体反序列化函数内立即创建 consumer，而是注册 `InitPriority.Lowest` 的 `RegisterInitAfterLoad` 回调。
-
-实际程序集显示：
-
-- `ElectricityManager` 以 `High` 优先级恢复自身；
-- 已保存的 `ElectricityConsumer` 以 `Low` 优先级执行 `initSelf`；
-- v1 迁移使用 `Lowest`，因此在电力系统恢复完成后通过官方 factory 注册 consumer。
-
-正式兼容标识保持为：
-
-```text
-Mod ID:             MeteredGate
-Assembly:           MeteredGate.dll
-Primary mod class:  MeteredGate.MeteredGateMod
-Prototype ID:       MeteredGate_Entity
-Clone keys:         MeteredGate.CycleSeconds
-                    MeteredGate.ItemsPerCycle
-```
-
-## 防御性处理
-
-- 周期和配额值在读取配置、复制设置和反序列化时夹紧；
-- 调整参数使用饱和加法，避免整数溢出；
-- 周期相位按合法周期归一化；
-- 剩余配额限制在 `[0, itemsPerCycle]`；
-- 重新启用或暂停时清除上一 tick 的供电授权；
-- 载入后不恢复瞬时 `m_hasPower`，等待下一次模拟更新重新判断。
+- 成本取自 Flat Conveyor，`workers: 0`，维护为空；
+- 原型声明 20 kW，实体通过官方 `ElectricityConsumerFactory` 接入电力系统；
+- 端口的接收/发送余量语义、单件缓冲、配额扣除和 round-robin 逻辑保持正确；
+- Inspector 写操作通过 `InputCommand` 调度；
+- 周期 UI 的 `-30/-1/+1/+30` 秒按钮只传递整数 delta，复用现有命令、夹紧和重启周期逻辑，不改变存档格式；
+- v1 → v2 consumer 迁移与正式持久化 ID 均保持不变。
 
 ## 剩余风险
 
-### 低风险：Gfx 内部字段
+1. `LayoutEntityProto.Gfx` 仍通过浅复制和内部 owner/icon 字段重绑定，升级游戏版本后必须复核。
+2. 玩家可在 0.3.0 中已经建成范围外建筑；0.3.1 不主动删除或移动已有实体，只阻止新的添加/复制/移动请求。
+3. 当前环境没有 .NET SDK，最终 C# 编译和游戏内验证必须在安装游戏的机器上完成。
 
-为了复用 Flat Connector 的工具栏图标和图形，代码仍会浅复制 `LayoutEntityProto.Gfx`，并通过反射重置 `m_proto`、图标路径和 `IconIsCustom`。这些字段已在 0.8.6 程序集中确认，但游戏版本升级后必须复核。
+## 发布前必须验证
 
-### 原版 UI 行为：Shift 升降越界预览
-
-普通 `LayoutEntityProto` 的 Shift 快速升降可能让游标暂时跳出连接器布局范围。该位置会被原生验证判定为不可建造。为避免重新引入 Harmony 或 `MiniZipperProto` 副作用，0.3.0 不对这个纯预览行为做私有方法补丁。
-
-### 必须运行验证
-
-发布前仍需验证：
-
-- `bash build.bash --clean` 无警告、无错误；
-- 0.2.0 v1 存档载入并补建 consumer；
-- v2 保存后再次载入；
-- 缺电、Priority、暂停、堵塞、拆除、复制设置；
-- CoI Hub 扫描结果不再显示 Harmony。
+- `bash build.bash --clean` 零警告零错误；
+- 高度上下边界、Shift、复制、蓝图和移动测试；
+- 普通建筑不受 validator 影响；
+- 0.1.0/0.2.0 存档迁移；
+- 20 kW、Priority、暂停、堵塞、拆除和再次载入。

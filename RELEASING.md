@@ -1,8 +1,13 @@
-# Metered Gate 0.3.0 发布流程
+# Metered Gate 0.3.1 发布流程
 
-## 1. 保留测试存档
+## 1. 准备回归存档
 
-升级测试前复制一份包含 0.2.0 Metered Gate 建筑的存档。不要只用新建存档测试，因为 0.3.0 增加了 v1 → v2 电力 consumer 迁移。
+至少准备两份备份：
+
+- 一份包含 0.1.0/0.2.0 Metered Gate 的 v1 存档，用于测试 v1 → v2 电力 consumer 迁移；
+- 一份曾用 0.3.0 测试过高度的存档，用于确认已有范围外建筑不会导致载入异常。
+
+0.3.1 不会自动移动或删除 0.3.0 已经建成的范围外建筑；它只阻止新的放置、复制、蓝图和移动请求。
 
 ## 2. 干净构建
 
@@ -14,8 +19,9 @@ bash build.bash --clean
 
 - 0 个错误；
 - 0 个警告；
+- 静态检查全部通过；
 - `dist/MeteredGate/` 中没有 `0Harmony.dll`；
-- 自动生成 `dist/MeteredGate-0.3.0.zip`；
+- 自动生成 `dist/MeteredGate-0.3.1.zip`；
 - ZIP 根目录是 `MeteredGate/`。
 
 预期发行目录：
@@ -33,11 +39,22 @@ MeteredGate/
 
 ## 3. 游戏内回归测试
 
-按 `TEST_PLAN.md` 完成新建筑、电力、物流、存档迁移、复制和拆除测试。尤其确认日志中存在 v1 迁移信息，且没有序列化、命令处理器或原型注册错误。
+完整执行 `TEST_PLAN.md`。高度测试至少覆盖：
+
+- 范围上下边界；
+- 普通升降与 Shift 快速升降；
+- 单栋复制和多选复制；
+- 蓝图放置；
+- 移动已有建筑；
+- 普通非 Metered Gate 建筑不受影响。
+
+游标可以暂时越过连接器范围，但范围外预览必须显示无效，并且不能提交建造。
+
+周期 UI 至少覆盖四个按钮的单击、连续点击、1 秒下限、3600 秒上限，以及修改周期后重新从零计时。
 
 ## 4. 更新 GitHub
 
-使用本次交付的 GitHub 更新包覆盖仓库工作树，随后检查差异：
+在仓库中应用本次 `0.3.0 → 0.3.1` 补丁，随后检查：
 
 ```bash
 git status --short
@@ -46,7 +63,14 @@ git diff --stat
 git diff
 ```
 
-确认删除 `src/MeteredGateHeightPolicy.cs`，并确认没有提交：
+确认新增：
+
+```text
+src/MeteredGateHeightValidator.cs
+COIHUB_CHANGELOG_0.3.1.txt
+```
+
+不要提交：
 
 ```text
 bin/
@@ -61,27 +85,27 @@ dist/
 
 ```bash
 git add -A
-git commit -m "Release Metered Gate 0.3.0"
-git tag -a v0.3.0 -m "Metered Gate 0.3.0"
+git commit -m "Release Metered Gate 0.3.1"
+git tag -a v0.3.1 -m "Metered Gate 0.3.1"
 git push origin main
-git push origin v0.3.0
+git push origin v0.3.1
 ```
 
 GitHub Release：
 
-- tag：`v0.3.0`；
-- title：`Metered Gate 0.3.0`；
+- tag：`v0.3.1`；
+- title：`Metered Gate 0.3.1`；
 - 正文：`GITHUB_RELEASE_NOTES.md`；
-- 附件：`dist/MeteredGate-0.3.0.zip`。
+- 附件：`dist/MeteredGate-0.3.1.zip`。
 
 ## 5. 更新 CoI Hub
 
-在原有 Metered Gate 页面新增 `0.3.0` 版本，不要新建另一个 Mod ID。
+在原有 Metered Gate 页面新增 `0.3.1` 版本，不要创建新的 Mod 页面或更改 Mod ID。
 
 上传：
 
 ```text
-dist/MeteredGate-0.3.0.zip
+dist/MeteredGate-0.3.1.zip
 ```
 
 页面字段：
@@ -91,6 +115,6 @@ dist/MeteredGate-0.3.0.zip
 - License：CoI-Open；
 - Source code：GitHub 仓库；
 - 介绍：`COIHUB_DESCRIPTION.md`；
-- Changelog：`COIHUB_CHANGELOG_0.3.0.txt`。
+- Changelog：`COIHUB_CHANGELOG_0.3.1.txt`。
 
-发布后下载一次 Hub 上的文件，核对 ZIP 结构、版本号与 SHA-256，并查看代码扫描是否已去掉 Harmony 标记。
+发布后重新下载 Hub 文件，核对 ZIP 结构、版本号和 SHA-256；再用下载版本完成一次高度越界测试。

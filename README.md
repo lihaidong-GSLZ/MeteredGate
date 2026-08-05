@@ -1,7 +1,7 @@
 # Metered Gate
 
 - 作者：lihaidong
-- 版本：0.3.0
+- 版本：0.3.1
 - 游戏版本：Captain of Industry 0.8.6–0.8.6c
 - 源代码：https://github.com/lihaidong-GSLZ/MeteredGate
 
@@ -11,6 +11,7 @@ Metered Gate 是一个 `1×1` 的定量平面传送带闸门。玩家可以为�
 
 - 四个可动态配置的平面传送带输入/输出端口；
 - 每栋建筑独立设置周期和配额；
+- Inspector 提供 `-30 s`、`-1 s`、`+1 s`、`+30 s` 周期读秒按钮；
 - 未使用配额不会跨周期累积；
 - 内部只缓存一个单位，堵塞时不会继续从上游抽取；
 - 多个输出之间采用轮询；
@@ -18,16 +19,16 @@ Metered Gate 是一个 `1×1` 的定量平面传送带闸门。玩家可以为�
 - 支持暂停、保存、载入和复制设置；
 - 兼容 0.1.0/0.2.0 的正式 `MeteredGate_Entity` 存档。
 
-## 0.3.0 架构
+## 0.3.x 架构
 
-0.3.0 的自定义原型直接继承 `LayoutEntityProto`。模组只从原版 Flat Connector 复用：
+自定义原型直接继承 `LayoutEntityProto`，只从原版 Flat Connector 复用：
 
 - `EntityLayout`：占地、四向动态端口和 `PlacementHeightRange`；
 - `Gfx`：模型及工具栏图标。
 
-它**不**继承 `ZipperProto` 或 `MiniZipperProto`。后者不仅影响高度，还会触发运输带切割、Mini Zipper 放置验证和蓝图忽略等内部语义，因此不适合作为玩家建筑基类。
+它不继承 `ZipperProto` 或 `MiniZipperProto`。后者还会触发运输带切割、Mini Zipper 专用放置验证、自动生成和蓝图过滤，不适合作为玩家建筑基类。
 
-0.3.0 同时删除了 Flat Balancer 数据依赖、Harmony 补丁和 `0Harmony.dll`。高度合法性由连接器布局和游戏原生放置验证处理。
+0.3.x 不依赖 Flat Balancer，也不使用 Harmony。0.3.1 新增 `MeteredGateHeightValidator`：它通过游戏公开的 `IEntityAdditionValidator<LayoutEntityAddRequest>` 接口计算建筑相对地形的高度，并严格拒绝 `PlacementHeightRange` 之外的建造、复制或移动请求。
 
 ## 周期语义
 
@@ -52,9 +53,9 @@ Config clone keys:  MeteredGate.CycleSeconds
                     MeteredGate.ItemsPerCycle
 ```
 
-0.1.0/0.2.0 使用实体存档格式 v1。0.3.0 在对象图载入结束后通过官方 `ElectricityConsumerFactory` 创建新的 consumer，再以 v2 格式保存，因此旧建筑可以获得新增的 20 kW 电力行为。
+0.1.0/0.2.0 使用实体存档格式 v1。0.3.x 在对象图载入结束后通过官方 `ElectricityConsumerFactory` 创建新的 consumer，再以 v2 格式保存，因此旧建筑可以获得新增的 20 kW 电力行为。
 
-升级前仍建议备份存档。存档中存在 Metered Gate 建筑时不要移除模组。
+升级前建议备份存档。存档中存在 Metered Gate 建筑时不要移除模组。用 0.3.x 保存为 v2 后，不应再降级到只支持 v1 的 0.1.0/0.2.0。
 
 ## 安装
 
@@ -74,8 +75,6 @@ Mods/
 
 ## 从源码构建
 
-需要已安装 Captain of Industry 和兼容的 .NET SDK。`COI_ROOT` 指向游戏根目录：
-
 ```bash
 bash build.bash --clean
 ```
@@ -84,17 +83,15 @@ bash build.bash --clean
 
 ```text
 dist/MeteredGate/
-dist/MeteredGate-0.3.0.zip
+dist/MeteredGate-0.3.1.zip
 ```
-
-后者可直接上传 CoI Hub。
 
 ## 已知限制
 
 - 只处理平面传送带的单位货物；
 - 多个输入共享一件缓冲和一份总配额；
 - 不提供原版 Balancer 的优先输入、优先输出或均匀分配选项；
-- Shift 快速升降可能让普通 `LayoutEntityProto` 的预览游标暂时跳到连接器范围外，但该位置会被游戏判定为无效，不能建造；
+- Shift 快速升降仍可能让预览游标暂时越过连接器范围，但 0.3.1 的公开添加验证器会把该位置标记为无效并拒绝实际建造；
 - Gfx 复制仍依赖 CoI 0.8.6 的内部 owner/icon 字段，游戏更新后需要复核。
 
 ## 许可证

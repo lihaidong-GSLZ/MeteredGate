@@ -19,7 +19,8 @@ namespace MeteredGate {
 				IdsCore.Transports.GetMiniZipperIdFor(flatConveyor.PortsShape.Id);
 
 			// Flat Connector 只提供不可变的布局与图形模板：1×1 四向端口、
-			// 原生放置高度范围和模型资源。自定义 Proto 不继承其特殊类型身份。
+			// 放置高度范围和模型资源。自定义 Proto 不继承其特殊类型身份；
+			// 范围由 MeteredGateHeightValidator 在最终添加请求中强制执行。
 			MiniZipperProto sourceConnector =
 				registrator.PrototypesDb.GetOrThrow<MiniZipperProto>(sourceConnectorId);
 

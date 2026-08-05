@@ -16,8 +16,8 @@ namespace MeteredGate {
 	///   蓝图系统当作自动连接器忽略。
 	///
 	/// 因此这里直接继承 LayoutEntityProto，同时复用原版 Flat Connector 的
-	/// EntityLayout 与 Gfx。放置高度范围由 sourceConnector.Layout 中的
-	/// PlacementHeightRange 原生提供，不再使用 Harmony 修改放置器。
+	/// EntityLayout 与 Gfx。放置高度范围取自 sourceConnector.Layout，
+	/// 并由 MeteredGateHeightValidator 通过公开添加验证 API 强制执行。
 	/// </summary>
 	public sealed class MeteredGateProto :
 		LayoutEntityProto,

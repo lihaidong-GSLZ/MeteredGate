@@ -1,17 +1,22 @@
-# CoI Hub 0.3.0 上传清单
+# CoI Hub 0.3.1 上传清单
 
 - [ ] 已在本机执行 `bash build.bash --clean`；
 - [ ] 构建为 0 warnings / 0 errors；
-- [ ] 已完成 `TEST_PLAN.md` 中的 v1 存档迁移测试；
-- [ ] 上传文件是 `dist/MeteredGate-0.3.0.zip`；
+- [ ] `tools/static_check.py` 全部通过；
+- [ ] 已完成 `TEST_PLAN.md` 中的高度、v1 存档迁移和电力测试；
+- [ ] Inspector 正确显示并执行 `-30 s`、`-1 s`、`+1 s`、`+30 s` 周期调整；
+- [ ] 范围外的普通放置、Shift、复制、蓝图和移动均无法提交；
+- [ ] 普通非 Metered Gate 建筑不受高度验证器影响；
+- [ ] 上传文件是 `dist/MeteredGate-0.3.1.zip`；
 - [ ] ZIP 根目录为 `MeteredGate/`；
 - [ ] ZIP 内无 `0Harmony.dll`；
-- [ ] 页面版本填写 `0.3.0`；
+- [ ] 页面版本填写 `0.3.1`；
 - [ ] 游戏版本填写 `0.8.6` – `0.8.6c`；
 - [ ] Save-game 设置 Add ✓ / Remove ✗；
 - [ ] License 选择 CoI-Open；
 - [ ] Source code 指向正式 GitHub 仓库；
 - [ ] 介绍粘贴 `COIHUB_DESCRIPTION.md`；
-- [ ] Changelog 粘贴 `COIHUB_CHANGELOG_0.3.0.txt`；
+- [ ] Changelog 粘贴 `COIHUB_CHANGELOG_0.3.1.txt`；
 - [ ] 发布后重新下载并核对文件；
-- [ ] 查看代码扫描，确认不再标记 Harmony。
+- [ ] 用 Hub 下载版本再次测试高度越界；
+- [ ] 查看代码扫描，确认没有 Harmony 依赖。

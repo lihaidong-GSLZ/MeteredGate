@@ -8,7 +8,7 @@ MANAGED_DIR="$COI_ROOT/Captain of Industry_Data/Managed"
 OUTPUT_DIR="$PROJECT_DIR/bin/Release/net48"
 DIST_ROOT="$PROJECT_DIR/dist"
 DIST_DIR="$DIST_ROOT/MeteredGate"
-UPLOAD_ZIP="$DIST_ROOT/MeteredGate-0.3.0.zip"
+UPLOAD_ZIP="$DIST_ROOT/MeteredGate-0.3.1.zip"
 
 case "${1:-}" in
     "") ;;
@@ -47,7 +47,7 @@ done
 
 python3 "$PROJECT_DIR/tools/static_check.py" "$PROJECT_DIR"
 
-echo "正在编译 Metered Gate 0.3.0……"
+echo "正在编译 Metered Gate 0.3.1……"
 echo "项目：$PROJECT_FILE"
 echo "游戏目录：$COI_ROOT"
 
@@ -73,7 +73,7 @@ cp "$MOD_DLL" \
    "$PROJECT_DIR/THIRD_PARTY_NOTICES.md" \
    "$DIST_DIR/"
 
-# 0.3.0 不再分发 Harmony；若旧文件意外进入发行目录则直接失败。
+# 0.3.1 不分发 Harmony；若旧文件意外进入发行目录则直接失败。
 if find "$DIST_DIR" -maxdepth 1 -iname '*Harmony*.dll' -print -quit | grep -q .; then
     echo "错误：发行目录中发现不应存在的 Harmony DLL。" >&2
     exit 1
