@@ -8,7 +8,7 @@ Metered Gate is an elevatable 1×1 logistics node for flat conveyors. Players ca
 
 - 四个可动态配置的平面传送带端口；
 - 独立周期与配额、进度显示、多输出轮询；
-- 周期可用 `-30 s`、`-1 s`、`+1 s`、`+30 s` 按钮快速或精细调整；
+- 周期可用 `-30 s`、`-10 s`、`-1 s`、`+1 s`、`+10 s`、`+30 s` 按钮快速或精细调整；
 - 复用原版 Flat Connector 的布局、模型、图标和高度范围；
 - 使用游戏公开的实体添加验证 API 严格拒绝范围外建造；
 - 连续消耗 `20 kW`，支持游戏原生电力 Priority；
@@ -17,7 +17,7 @@ Metered Gate is an elevatable 1×1 logistics node for flat conveyors. Players ca
 
 - Four dynamically configurable flat-conveyor ports;
 - Configurable cycle and quota, progress displays, and round-robin outputs;
-- Cycle controls for -30 s, -1 s, +1 s, and +30 s adjustments;
+- Cycle controls for -30 s, -10 s, -1 s, +1 s, +10 s, and +30 s adjustments;
 - Reuses the original Flat Connector layout, model, icon, and height range;
 - Enforces the range with the public entity-addition validation API;
 - Consumes 20 kW continuously and uses native power priority;

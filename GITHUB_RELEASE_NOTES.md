@@ -6,7 +6,11 @@ The mod now registers `MeteredGateHeightValidator` through the game's public dep
 
 ## Cycle controls
 
-The Inspector now provides `-30 s`, `-1 s`, `+1 s`, and `+30 s` buttons. All changes continue to use the replayable input-command path, reset the current cycle, and clamp the configured duration to 1–3600 seconds.
+The Inspector now provides `-30 s`, `-10 s`, `-1 s`, `+1 s`, `+10 s`, and `+30 s` buttons. All changes continue to use the replayable input-command path, reset the current cycle, and clamp the configured duration to 1–3600 seconds.
+
+## Build integration
+
+CoI 0.8.6 exposes `DataOnlyMod.RegisterDependencies` as a final implementation of `IMod.RegisterDependencies`, so it cannot be overridden. `MeteredGateMod` now explicitly reimplements the interface member and registers `MeteredGateHeightValidator` from that method.
 
 ## Other behavior
 

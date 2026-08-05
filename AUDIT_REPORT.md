@@ -18,9 +18,14 @@ MeteredGateHeightValidator
 注册路径：
 
 ```text
-DataOnlyMod.RegisterDependencies(...)
+MeteredGateMod : DataOnlyMod, IMod
+显式重新实现 IMod.RegisterDependencies(...)
 DependencyResolverBuilder.RegisterDependency<T>().AsAllInterfaces()
 ```
+
+CoI 0.8.6 的 `DataOnlyMod.RegisterDependencies(...)` 是 `IMod` 的 final 接口实现，
+不能在派生类中 `override`。`MeteredGateMod` 因此在基类列表中重新声明 `IMod`，
+并显式重新实现该接口成员；模组加载器通过 `IMod` 调用时会进入派生实现。
 
 实际 CoI 0.8.6 程序集确认：
 
@@ -69,14 +74,14 @@ else:
 - 原型声明 20 kW，实体通过官方 `ElectricityConsumerFactory` 接入电力系统；
 - 端口的接收/发送余量语义、单件缓冲、配额扣除和 round-robin 逻辑保持正确；
 - Inspector 写操作通过 `InputCommand` 调度；
-- 周期 UI 的 `-30/-1/+1/+30` 秒按钮只传递整数 delta，复用现有命令、夹紧和重启周期逻辑，不改变存档格式；
+- 周期 UI 的 `-30/-10/-1/+1/+10/+30` 秒按钮只传递整数 delta，复用现有命令、夹紧和重启周期逻辑，不改变存档格式；
 - v1 → v2 consumer 迁移与正式持久化 ID 均保持不变。
 
 ## 剩余风险
 
 1. `LayoutEntityProto.Gfx` 仍通过浅复制和内部 owner/icon 字段重绑定，升级游戏版本后必须复核。
 2. 玩家可在 0.3.0 中已经建成范围外建筑；0.3.1 不主动删除或移动已有实体，只阻止新的添加/复制/移动请求。
-3. 当前环境没有 .NET SDK，最终 C# 编译和游戏内验证必须在安装游戏的机器上完成。
+3. 依赖注册使用 C# 的接口重新实现机制；已按 CoI 0.8.6 的 final 接口方法契约修正，仍需在安装游戏的机器上完成最终编译与运行验证。
 
 ## 发布前必须验证
 

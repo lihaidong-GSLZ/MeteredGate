@@ -2,7 +2,8 @@
 
 ## 0.3.1
 
-- Inspector 的周期读秒控制改为 `-30 s`、`-1 s`、`+1 s`、`+30 s` 四档，兼顾精细调整与快速调整；
+- 修复 `DataOnlyMod.RegisterDependencies` 不能被 override 导致的编译错误；改为显式重新实现 `IMod.RegisterDependencies`；
+- Inspector 的周期读秒控制提供 `-30 s`、`-10 s`、`-1 s`、`+1 s`、`+10 s`、`+30 s` 六档，兼顾精细、中速与快速调整；
 - 修复 0.3.0 中高度限制实际未被最终建造验证强制执行的问题；
 - 新增基于公开 API 的 `MeteredGateHeightValidator`；
 - 验证器复现原版预览的相对地形高度计算，并严格检查 Flat Connector 的 `PlacementHeightRange`；

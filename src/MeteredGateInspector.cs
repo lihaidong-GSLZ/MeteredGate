@@ -57,6 +57,19 @@ namespace MeteredGate {
 				},
 				new Row(6.pt()) {
 					new ButtonText(
+						"-10 s".AsLoc(),
+						(Action)(() => schedule(
+							MeteredGateCommandKind.AdjustCycleSeconds,
+							-10))).Compact(),
+					new Label().Width(84.px()),
+					new ButtonText(
+						"+10 s".AsLoc(),
+						(Action)(() => schedule(
+							MeteredGateCommandKind.AdjustCycleSeconds,
+							10))).Compact()
+				},
+				new Row(6.pt()) {
+					new ButtonText(
 						"-30 s".AsLoc(),
 						(Action)(() => schedule(
 							MeteredGateCommandKind.AdjustCycleSeconds,

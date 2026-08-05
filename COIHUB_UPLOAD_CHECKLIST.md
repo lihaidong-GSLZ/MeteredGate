@@ -4,7 +4,7 @@
 - [ ] 构建为 0 warnings / 0 errors；
 - [ ] `tools/static_check.py` 全部通过；
 - [ ] 已完成 `TEST_PLAN.md` 中的高度、v1 存档迁移和电力测试；
-- [ ] Inspector 正确显示并执行 `-30 s`、`-1 s`、`+1 s`、`+30 s` 周期调整；
+- [ ] Inspector 正确显示并执行 `-30 s`、`-10 s`、`-1 s`、`+1 s`、`+10 s`、`+30 s` 周期调整；
 - [ ] 范围外的普通放置、Shift、复制、蓝图和移动均无法提交；
 - [ ] 普通非 Metered Gate 建筑不受高度验证器影响；
 - [ ] 上传文件是 `dist/MeteredGate-0.3.1.zip`；

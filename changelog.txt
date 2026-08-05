@@ -1,5 +1,6 @@
 0.3.1
-- Added -30 s, -1 s, +1 s, and +30 s cycle-duration controls to the Inspector.
+- Fixed compilation by explicitly reimplementing IMod.RegisterDependencies; DataOnlyMod seals its interface implementation in CoI 0.8.6.
+- Added -30 s, -10 s, -1 s, +1 s, +10 s, and +30 s cycle-duration controls to the Inspector.
 - Fixed the placement-height restriction not being enforced in 0.3.0.
 - Added a public-API entity addition validator for Metered Gate placement.
 - The validator calculates height relative to rounded terrain height and enforces the Flat Connector PlacementHeightRange.

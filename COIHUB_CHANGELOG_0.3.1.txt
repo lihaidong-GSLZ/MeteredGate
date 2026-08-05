@@ -1,4 +1,5 @@
-- Added -30 s, -1 s, +1 s, and +30 s cycle-duration buttons for both precise and fast adjustment.
+- Fixed compilation by explicitly reimplementing IMod.RegisterDependencies, which DataOnlyMod exposes as a final interface implementation in CoI 0.8.6.
+- Added -30 s, -10 s, -1 s, +1 s, +10 s, and +30 s cycle-duration buttons for precise, medium, and fast adjustment.
 - Fixed the placement-height restriction introduced in 0.3.0: out-of-range positions could still be built because PlacementHeightRange is not a final validator for ordinary LayoutEntityProto buildings.
 - Added a public-API entity addition validator that calculates Metered Gate height relative to terrain and enforces the original Flat Connector range.
 - Normal placement, Shift movement, cloning, blueprints, and moved buildings are now rejected outside the allowed range.

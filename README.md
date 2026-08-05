@@ -11,7 +11,7 @@ Metered Gate 是一个 `1×1` 的定量平面传送带闸门。玩家可以为�
 
 - 四个可动态配置的平面传送带输入/输出端口；
 - 每栋建筑独立设置周期和配额；
-- Inspector 提供 `-30 s`、`-1 s`、`+1 s`、`+30 s` 周期读秒按钮；
+- Inspector 提供 `-30 s`、`-10 s`、`-1 s`、`+1 s`、`+10 s`、`+30 s` 周期读秒按钮；
 - 未使用配额不会跨周期累积；
 - 内部只缓存一个单位，堵塞时不会继续从上游抽取；
 - 多个输出之间采用轮询；
@@ -28,7 +28,7 @@ Metered Gate 是一个 `1×1` 的定量平面传送带闸门。玩家可以为�
 
 它不继承 `ZipperProto` 或 `MiniZipperProto`。后者还会触发运输带切割、Mini Zipper 专用放置验证、自动生成和蓝图过滤，不适合作为玩家建筑基类。
 
-0.3.x 不依赖 Flat Balancer，也不使用 Harmony。0.3.1 新增 `MeteredGateHeightValidator`：它通过游戏公开的 `IEntityAdditionValidator<LayoutEntityAddRequest>` 接口计算建筑相对地形的高度，并严格拒绝 `PlacementHeightRange` 之外的建造、复制或移动请求。
+0.3.x 不依赖 Flat Balancer，也不使用 Harmony。依赖注册通过显式重新实现 `IMod.RegisterDependencies` 完成，因为 CoI 0.8.6 的 `DataOnlyMod` 将该接口成员实现为 final。0.3.1 新增 `MeteredGateHeightValidator`：它通过游戏公开的 `IEntityAdditionValidator<LayoutEntityAddRequest>` 接口计算建筑相对地形的高度，并严格拒绝 `PlacementHeightRange` 之外的建造、复制或移动请求。
 
 ## 周期语义
 

@@ -144,8 +144,12 @@ check('relativeHeight <= allowedRange.To' in validator_text,
       'upper-bound check missing')
 check('EntityValidationResult.CreateError' in validator_text,
       'out-of-range rejection missing')
-check('RegisterDependencies(' in mod_text,
-      'dependency registration override missing')
+check(': DataOnlyMod, IMod' in mod_text,
+      'mod must explicitly reimplement IMod')
+check('void IMod.RegisterDependencies(' in mod_text,
+      'explicit IMod dependency registration missing')
+check('public override void RegisterDependencies' not in mod_text,
+      'DataOnlyMod.RegisterDependencies is final and cannot be overridden')
 check('RegisterDependency<MeteredGateHeightValidator>()' in mod_text,
       'height validator dependency registration missing')
 check('.AsAllInterfaces()' in mod_text,
@@ -175,16 +179,15 @@ check('public new static MeteredGateConfigCmd Deserialize' in commands_text,
       'CS0108 suppression missing')
 
 # Inspector cycle-duration controls.
-for label, delta in (("-30 s", -30), ("-1 s", -1), ("+1 s", 1), ("+30 s", 30)):
+for label, delta in (
+        ("-30 s", -30), ("-10 s", -10), ("-1 s", -1),
+        ("+1 s", 1), ("+10 s", 10), ("+30 s", 30)):
     check(f'"{label}".AsLoc()' in inspector_text,
           f'missing cycle control label: {label}')
     check(re.search(
         rf'MeteredGateCommandKind\.AdjustCycleSeconds,\s*{delta}\)\)\)\.Compact\(\)',
         inspector_text) is not None,
         f'cycle control uses wrong delta: {label}')
-check('"-10 s".AsLoc()' not in inspector_text
-      and '"+10 s".AsLoc()' not in inspector_text,
-      'obsolete +/-10 second cycle controls remain')
 
 # Distribution safety.
 check('0Harmony.dll 残留' in build_text,

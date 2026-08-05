@@ -3,7 +3,7 @@ Metered Gate 0.3.1
 A 1x1 metered logistics gate for flat conveyors.
 
 - Configurable cycle duration and release quota.
-- Inspector cycle controls: -30 s, -1 s, +1 s, and +30 s.
+- Inspector cycle controls: -30 s, -10 s, -1 s, +1 s, +10 s, and +30 s.
 - One-item internal buffer and round-robin outputs.
 - Four dynamically configurable flat-conveyor ports.
 - Uses the original Flat Connector layout, model, icon, and height range.
